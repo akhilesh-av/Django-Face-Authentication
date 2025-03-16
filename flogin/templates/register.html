@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Face</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .register-container {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+
+        #register-form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        input[type="text"] {
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .camera-container {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        video {
+            width: 100%;
+            border-radius: 4px;
+            background-color: #000;
+        }
+
+        #capture-button {
+            margin-top: 0.5rem;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 4px;
+            background-color: #007BFF;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        #capture-button:hover {
+            background-color: #0056b3;
+        }
+
+        button[type="submit"] {
+            padding: 0.75rem;
+            border: none;
+            border-radius: 4px;
+            background-color: #28a745;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #218838;
+        }
+
+        #message {
+            margin-top: 1rem;
+            color: #555;
+        }
+
+        canvas {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <h1>Register Face</h1>
+        <form id="register-form">
+            <input type="text" name="username" id="username" placeholder="Username" required>
+            <div class="camera-container">
+                <video id="video" width="100%" height="auto" autoplay></video>
+                <button type="button" id="capture-button">Capture Face</button>
+                <canvas id="canvas" width="300" height="200"></canvas>
+            </div>
+            <button type="submit">Register</button>
+        </form>
+        <div id="message"></div>
+    </div>
+</body>
+<script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const captureButton = document.getElementById('capture-button');
+    const message = document.getElementById('message');
+
+    let captureImage= null
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+            video.srcObject = stream;
+        })
+        .catch(error => {
+            console.error('Error accessing camera:', error);
+            message.innerHTML = 'Error accessing camera';
+        });
+
+    captureButton.addEventListener('click', () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        captureImage = canvas.toDataURL('image/jpeg');
+        message.innerHTML = 'Face captured successfully';
+    }); 
+
+    registerForm.onsubmit = async (e) => {
+        e.preventDefault();
+
+        if (!captureImage) {
+            message.innerHTML = 'Please capture a face first';
+            return;
+        }
+        const formData = new FormData(registerForm);
+        // formData.append('username', username.value);
+        formData.append('face_image', captureImage);
+        const response = await fetch('/register/', {
+            method: 'POST',
+            body: formData
+        })
+
+        const data = await response.data();
+        message.innerText = data.mediaDevices || "Face registered Failed";
+    }
+
+</script>
+</html>
